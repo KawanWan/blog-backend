@@ -13,6 +13,7 @@ model User {
   email    String    @unique
   password String
   articles Article[]
+  avatar   String?
 }
 
 model Article {
@@ -24,4 +25,5 @@ model Article {
   updatedAt   DateTime @updatedAt
   authorId    String   @db.VarChar(36)
   author      User     @relation(fields: [authorId], references: [id])
+  thumbnailUrl String?
 }

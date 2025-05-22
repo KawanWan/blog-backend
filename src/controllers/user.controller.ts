@@ -6,24 +6,31 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 export const register = async (req: Request, res: Response): Promise<void> => {
-  const { name, email, password } = req.body
-  const hashedPassword = await bcrypt.hash(password, 10)
-
   try {
+    const { name, email, password, avatar } = req.body
+    const hashedPassword = await bcrypt.hash(password, 10)
+    
     const user = await prisma.user.create({
-      data: { name, email, password: hashedPassword }
+      data: {
+        name,
+        email,
+        password: hashedPassword,
+        avatar: avatar || null
+      }
     })
-    res.status(201).json(user)
+    res.status(201).json({ id: user.id, name: user.name, email: user.email, avatar: user.avatar })
   } catch (err) {
+    console.error('Erro register:', err)
     res.status(400).json({ error: 'Usuário já existe ou erro ao registrar' })
   }
 }
 
 export const login = async (req: Request, res: Response): Promise<void> => {
-  const { email, password } = req.body
-
   try {
-    const user = await prisma.user.findUnique({ where: { email } })
+    const { email, password } = req.body
+    const user = await prisma.user.findUnique({
+      where: { email }
+    })
     if (!user) {
       res.status(400).json({ error: 'Credenciais inválidas' })
       return
@@ -36,8 +43,39 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }
 
     const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET!, { expiresIn: '1h' })
-    res.json({ token, user: { id: user.id, name: user.name, email: user.email } })
+    res.json({
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar || null
+      }
+    })
   } catch (err) {
+    console.error('Erro login:', err)
+    res.status(500).json({ error: 'Erro interno no servidor' })
+  }
+}
+
+export const getProfile = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.userId
+    if (!userId) {
+      res.status(401).json({ error: 'Não autorizado' })
+      return
+    }
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, name: true, email: true, avatar: true }
+    })
+    if (!user) {
+      res.status(404).json({ error: 'Usuário não encontrado' })
+      return
+    }
+    res.json(user)
+  } catch (err) {
+    console.error('Erro getProfile:', err)
     res.status(500).json({ error: 'Erro interno no servidor' })
   }
 }
