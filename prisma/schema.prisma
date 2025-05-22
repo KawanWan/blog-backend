@@ -13,7 +13,7 @@ model User {
   email    String    @unique
   password String
   articles Article[]
-  avatar   String?
+  avatar   Bytes?
 }
 
 model Article {
