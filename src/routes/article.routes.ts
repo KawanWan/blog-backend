@@ -1,20 +1,35 @@
-import express from 'express'
+import express from 'express';
+import multer from 'multer';
 import {
   createArticle,
   getArticles,
   getArticleById,
   updateArticle,
   deleteArticle
-} from '../controllers/article.controller'
-import { authMiddleware } from '../middlewares/auth'
+} from '../controllers/article.controller';
+import { authMiddleware } from '../middlewares/auth';
 
-const router = express.Router()
+const router = express.Router();
 
-router.get('/', getArticles)
-router.get('/:id', getArticleById)
+const upload = multer({ storage: multer.memoryStorage() });
 
-router.post('/', authMiddleware, createArticle)
-router.put('/:id', authMiddleware, updateArticle)
-router.delete('/:id', authMiddleware, deleteArticle)
+router.get('/', getArticles);
+router.get('/:id', getArticleById);
 
-export default router
+router.post(
+  '/',
+  authMiddleware,
+  upload.single('thumbnail'),   // campo “thumbnail” do FormData
+  createArticle
+);
+
+router.put(
+  '/:id',
+  authMiddleware,
+  upload.single('thumbnail'),
+  updateArticle
+);
+
+router.delete('/:id', authMiddleware, deleteArticle);
+
+export default router;
