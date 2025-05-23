@@ -36,19 +36,19 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
     data: { token, userId: user.id, expiresAt: expires },
   });
 
-  // Monta URL de reset
   const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
 
-  // Envia e-mail
-  await transporter.sendMail({
-    from: '"Meu Blog" <no-reply@meublog.com>',
-    to: email,
-    subject: 'Recuperação de senha',
-    html: `
-      <p>Você solicitou recuperação de senha.</p>
-      <p>Clique <a href="${resetUrl}">aqui</a> para redefinir sua senha.</p>
-      <p>Esse link expira em 1 hora.</p>
-    `,
+  const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: Number(process.env.SMTP_PORT),
+    secure: false,
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+    tls: {
+      rejectUnauthorized: false,
+    },
   });
 
   res.status(200).json({ message: 'Se esse e-mail estiver cadastrado, enviaremos um link.' });
