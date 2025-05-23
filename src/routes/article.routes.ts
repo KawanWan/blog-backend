@@ -10,23 +10,24 @@ import {
 import { authMiddleware } from '../middlewares/auth';
 
 const router = express.Router();
-
 const upload = multer({ storage: multer.memoryStorage() });
 
 router.get('/', getArticles);
 router.get('/:id', getArticleById);
 
+// POST continua usando 'thumbnail'
 router.post(
   '/',
   authMiddleware,
-  upload.single('thumbnail'),   // campo “thumbnail” do FormData
+  upload.single('thumbnail'),
   createArticle
 );
 
+// PUT passa a usar 'image' para não dar "Unexpected field"
 router.put(
   '/:id',
   authMiddleware,
-  upload.single('thumbnail'),
+  upload.single('image'),
   updateArticle
 );
 
