@@ -7,6 +7,7 @@ import {
 } from '../controllers/user.controller'
 import { authMiddleware } from '../middlewares/auth'
 import { uploadAvatar } from '../middlewares/uploadAvatar'
+import { forgotPassword, resetPassword } from '../controllers/auth.controller';
 
 const router = express.Router()
 
@@ -20,5 +21,8 @@ router.patch(
   uploadAvatar,
   updateProfile
 )
+
+router.post('/auth/forgot-password', forgotPassword);
+router.post('/auth/reset-password', resetPassword);
 
 export default router
